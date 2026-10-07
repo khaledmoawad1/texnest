@@ -1,5 +1,5 @@
 # Overleaf Community Edition plus the complete TeX Live and the tools overleaf.com's compiler has.
-# Built by `./texnest build-texlive`; change BASE_VERSION on an Overleaf upgrade.
+# Built by `./texnest build-texlive` with the repository root as context; change BASE_VERSION on an Overleaf upgrade.
 ARG BASE_VERSION=6.3.0
 FROM sharelatex/sharelatex:${BASE_VERSION}
 
@@ -44,16 +44,20 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ghostscript imagemagick \
  && rm -rf /var/lib/apt/lists/*
 
-# TeXnest colors: append the generated theme to Overleaf's compiled stylesheets, then give each file a new
-# content hash in its name and in the asset manifest so browsers never keep a stale cached copy.
-COPY theme.css /tmp/texnest-theme.css
+# TeXnest branding (build context is the repository root): the generated theme is appended to Overleaf's
+# compiled stylesheets, which are renamed with a fresh content hash (and the asset manifest updated) so browsers
+# never keep a stale copy; every Overleaf brand image is replaced; the direct password-reset patch is applied.
+COPY branding /tmp/branding
+COPY texlive-full/patches /tmp/patches
 RUN cd /overleaf/services/web/public \
  && for f in stylesheets/main-style-*.css stylesheets/pages/ide-*.css stylesheets/ide-detached-*.css; do \
-      cat /tmp/texnest-theme.css >> "$f"; \
+      cat /tmp/branding/theme.css >> "$f"; \
       d=$(dirname "$f"); b=$(basename "$f"); n="${b%-*}-$(md5sum "$f" | cut -c1-20).css"; \
       mv "$f" "$d/$n" && sed -i "s|$b|$n|g" manifest.json; \
     done \
- && rm /tmp/texnest-theme.css
+ && python3 /tmp/patches/brand-assets.py \
+ && python3 /tmp/patches/direct-password-reset.py \
+ && rm -rf /tmp/branding /tmp/patches /tmp/blank.svg
 
 # Fail the build if any required tool is missing.
 RUN set -e; for b in pdflatex xelatex lualatex latexmk biber bibtex makeindex \

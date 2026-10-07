@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate texlive-full/theme.css: Overleaf's brand-green tokens remapped to the TeXnest palette.
+"""Generate branding/theme.css: Overleaf's brand-green tokens remapped to the TeXnest palette.
 
-Usage: python3 branding/make_theme.py --primary '#2F3E4E' --accent '#D9A21B' [--dark-primary '#D9A21B'] [--out texlive-full/theme.css]
+Usage: python3 branding/make_theme.py --primary '#2F3E4E' --accent '#D9A21B' [--dark-primary '#D9A21B'] [--out branding/theme.css]
 Light surfaces use --primary; the dark chrome (Overleaf's "default" theme) uses --dark-primary with dark text.
 """
 import argparse
@@ -142,7 +142,7 @@ def main():
     ap.add_argument("--accent", required=True, help="highlight color, e.g. '#D9A21B'")
     ap.add_argument("--dark-primary", default=None, help="primary for the dark chrome; a lighter tone that reads on dark")
     ap.add_argument("--dark-text", default="#1b222c", help="text color on the dark-chrome primary")
-    ap.add_argument("--out", default=str(Path(__file__).resolve().parent.parent / "texlive-full" / "theme.css"))
+    ap.add_argument("--out", default=str(Path(__file__).resolve().parent / "theme.css"))
     a = ap.parse_args()
     for h in (a.primary, a.accent, a.dark_primary or a.primary, a.dark_text):
         if len(h.lstrip("#")) != 6:

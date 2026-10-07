@@ -1,24 +1,7 @@
 # Loaded automatically by the toolkit; paths are relative to overleaf-toolkit/lib.
-# Adds the git-ignored local.env (its values win), mounts the TeXnest logo and favicons, and runs a
-# local mailbox (Mailpit) that receives every e-mail TeXnest sends: http://localhost:8091
+# Adds the git-ignored local.env (its values win) after variables.env.
 services:
   sharelatex:
     env_file:
       - ../config/variables.env
       - ../config/local.env
-    volumes:
-      - ../../branding/texnest.svg:/overleaf/services/web/public/img/texnest.svg:ro
-      - ../../branding/texnest-mark-dark.svg:/overleaf/services/web/public/img/texnest-mark-dark.svg:ro
-      - ../../branding/texnest-lockup.svg:/overleaf/services/web/public/img/texnest-lockup.svg:ro
-      - ../../branding/texnest-lockup-dark.svg:/overleaf/services/web/public/img/texnest-lockup-dark.svg:ro
-      - ../../branding/favicon.svg:/overleaf/services/web/public/favicon.svg:ro
-      - ../../branding/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
-      - ../../branding/favicon-16x16.png:/overleaf/services/web/public/favicon-16x16.png:ro
-      - ../../branding/favicon-32x32.png:/overleaf/services/web/public/favicon-32x32.png:ro
-      - ../../branding/apple-touch-icon.png:/overleaf/services/web/public/apple-touch-icon.png:ro
-  mail:
-    image: axllent/mailpit:v1.31.4
-    container_name: mail
-    restart: always
-    ports:
-      - "127.0.0.1:8091:8025"
