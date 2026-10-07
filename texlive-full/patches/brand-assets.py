@@ -19,6 +19,44 @@ for f in ("favicon.svg", "favicon.ico", "favicon-16x16.png", "favicon-32x32.png"
     shutil.copy(f"{SRC}/{f}", f"{PUB}/{f}")
 shutil.copy(f"{SRC}/favicon.ico", f"{PUB}/sl-favicon.ico")          # legacy names still shipped by Overleaf
 shutil.copy(f"{SRC}/mask-favicon.svg", f"{PUB}/sl-mask-favicon.svg")
+
+# Browsers cache a favicon per URL and seldom refetch it, so the pages and the editor must point at new,
+# TeXnest-specific names; the old names stay installed for anything else that asks for them.
+ICONS = {"favicon.svg": "texnest-favicon.svg", "favicon-compiling.svg": "texnest-favicon-compiling.svg",
+         "favicon-compiled.svg": "texnest-favicon-compiled.svg", "favicon-error.svg": "texnest-favicon-error.svg",
+         "favicon-32x32.png": "texnest-favicon-32x32.png", "favicon-16x16.png": "texnest-favicon-16x16.png",
+         "apple-touch-icon.png": "texnest-apple-touch-icon.png", "mask-favicon.svg": "texnest-mask-favicon.svg"}
+for old, new in ICONS.items():
+    shutil.copy(f"{SRC}/{old}", f"{PUB}/{new}")
+
+
+def rewrite(path, pairs, required=True):
+    """Replace quoted icon names in a template or bundle; fail the build if an expected name is missing."""
+    s = open(path).read()
+    for old, new in pairs:
+        if old not in s:
+            if required:
+                raise SystemExit(f"{path} no longer contains {old!r}; update texlive-full/patches/brand-assets.py")
+            continue
+        s = s.replace(old, new)
+    open(path, "w").write(s)
+
+
+WEB = "/overleaf/services/web"
+rewrite(f"{WEB}/app/views/_metadata.pug", [(f"'{o}'", f"'{n}'") for o, n in ICONS.items() if o != "favicon-compiling.svg"
+                                              and o != "favicon-compiled.svg" and o != "favicon-error.svg"])
+for path in glob.glob(f"{WEB}/app/views/**/*.js", recursive=True):   # precompiled views, when present
+    rewrite(path, [(f"'{o}'", f"'{n}'") for o, n in ICONS.items()], required=False)
+bundles = glob.glob(f"{PUB}/js/pages/ide-*.js")
+if not bundles:
+    raise SystemExit("editor bundle public/js/pages/ide-*.js not found")
+for path in bundles:
+    rewrite(path, [(f'"{o}"', f'"{n}"') for o, n in ICONS.items() if o.endswith(".svg") and o != "mask-favicon.svg"])
+    # new content hash in the file name and in the asset manifest, so a cached copy of the bundle is never used
+    d, b = os.path.split(path)
+    new = re.sub(r"-[0-9a-f]{20}\.js$", "", b) + "-" + subprocess.run(["md5sum", path], capture_output=True, text=True).stdout[:20] + ".js"
+    os.rename(path, os.path.join(d, new))
+    rewrite(f"{PUB}/manifest.json", [(b, new)])
 # Safari pinned-tab colour in the page templates
 for path in glob.glob("/overleaf/services/web/app/views/layout/*.pug") + glob.glob("/overleaf/services/web/app/views/*.pug"):
     t = open(path).read()
