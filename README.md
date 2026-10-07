@@ -10,7 +10,7 @@ TeXnest is a **self-hosted LaTeX server**. It gives you the Overleaf editor, das
 - **Complete TeX Live.** Every CTAN package, biber, minted, TikZ/pgfplots with gnuplot, the svg package with Inkscape, EPS figures, system fonts for XeLaTeX and LuaLaTeX, shell escape. What compiles on overleaf.com compiles here.
 - **Your projects, moved in two commands.** Projects, tags, archived state, your name and your editor settings come over from overleaf.com.
 - **One command for everything.** Install, start, backup, restore, update, users and a compile self-test through `./texnest`.
-- **The real Overleaf.** TeXnest packages the open-source Overleaf Community Edition, so the editor, project history, sharing and dashboard are the ones you already use.
+- **Built on Overleaf Community Edition.** TeXnest packages the open-source edition, so the editor, project history, sharing and dashboard are the ones you already know.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./te
 | `./texnest restore backups/<date>` | brings a backup back |
 | `./texnest user someone@example.com` | adds a user (create accounts for people you trust); `admin` instead of `user` makes an administrator |
 | `./texnest reset-password you@example.com` | prints a link to set a new password |
-| `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
+| `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer); asks for your login the first time |
 | `./texnest theme '#2F3E4E' '#D9A21B'` | recolors the interface from a primary and an accent color |
 | `./texnest help` | lists all commands |
 
@@ -67,6 +67,8 @@ Inside TeXnest it is Overleaf: *New project* (blank, example or *Upload project*
    Every project is uploaded and your tags, archived state, name and editor preferences are recreated. About 200 projects take ten minutes. Running it again never creates duplicates.
 4. Open <http://localhost:8090/project>. For a project that used XeLaTeX or LuaLaTeX, pick that compiler once in its *Menu*.
 
+The exporter only uses your own session to download your own projects, one at a time with a pause between them, exactly as the dashboard's "Download" button would. Use it for your own account and in line with overleaf.com's terms of service.
+
 ## Backup and restore
 
 `./texnest backup` writes `backups/texnest-backup-<date>/` with the database, all project files and history, and your configuration. Keep a copy somewhere safe. `./texnest restore <folder>` brings it back, also on a new machine after `./texnest install`.
@@ -85,7 +87,7 @@ Release notes: <https://github.com/overleaf/overleaf/wiki/Release-Notes-6.x>.
 
 Settings live in `config/`; personal values go in `config/local.env`, which is created on first run and never committed, and override `config/variables.env`. Run `./texnest up` after a change.
 
-- **Port**: `OVERLEAF_PORT` in `config/overleaf.rc`, plus `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env`.
+- **Port**: `OVERLEAF_PORT` in `config/overleaf.rc`, plus `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env`. TeXnest listens on 127.0.0.1 only, so nothing is reachable from other machines unless you change the next setting.
 - **Name, logo and colors**: `OVERLEAF_APP_NAME` and `OVERLEAF_NAV_TITLE` in `variables.env`; the files in `branding/`; `./texnest theme '#PRIMARY' '#ACCENT'` recolors the interface.
 - **Other devices on your network**: `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`.
 - **Password reset without e-mail**: on by default (`TEXNEST_DIRECT_PASSWORD_RESET=true`). If other people can reach your TeXnest over the network, set it to `false` and put SMTP settings in `local.env` (`config/local.env.example` shows a Gmail example) so resets go by e-mail.
