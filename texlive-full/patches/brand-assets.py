@@ -43,6 +43,11 @@ def rewrite(path, pairs, required=True):
 
 
 WEB = "/overleaf/services/web"
+NOTICE = "TeXnest: modified at image build time (icon file names); see github.com/khaledmoawad1/texnest"
+with open(f"{WEB}/app/views/_metadata.pug") as fh:
+    pug = fh.read()
+with open(f"{WEB}/app/views/_metadata.pug", "w") as fh:
+    fh.write(f"//- {NOTICE}\n" + pug)
 rewrite(f"{WEB}/app/views/_metadata.pug", [(f"'{o}'", f"'{n}'") for o, n in ICONS.items() if o != "favicon-compiling.svg"
                                               and o != "favicon-compiled.svg" and o != "favicon-error.svg"])
 for path in glob.glob(f"{WEB}/app/views/**/*.js", recursive=True):   # precompiled views, when present
@@ -52,6 +57,10 @@ if not bundles:
     raise SystemExit("editor bundle public/js/pages/ide-*.js not found")
 for path in bundles:
     rewrite(path, [(f'"{o}"', f'"{n}"') for o, n in ICONS.items() if o.endswith(".svg") and o != "mask-favicon.svg"])
+    with open(path) as fh:
+        js = fh.read()
+    with open(path, "w") as fh:
+        fh.write(f"/* {NOTICE} */\n" + js)
     # new content hash in the file name and in the asset manifest, so a cached copy of the bundle is never used
     d, b = os.path.split(path)
     new = re.sub(r"-[0-9a-f]{20}\.js$", "", b) + "-" + subprocess.run(["md5sum", path], capture_output=True, text=True).stdout[:20] + ".js"

@@ -42,7 +42,11 @@ def creds():
                 env.setdefault(k, None)
                 env[k] = env[k] or v.strip()
     if not env.get("LOCAL_OVERLEAF_EMAIL") or not env.get("LOCAL_OVERLEAF_PASSWORD"):
-        sys.exit("no credentials: set LOCAL_OVERLEAF_EMAIL/PASSWORD or create migration/.local-credentials")
+        if not sys.stdin.isatty():
+            sys.exit("no credentials: set LOCAL_OVERLEAF_EMAIL/PASSWORD or create migration/.local-credentials")
+        import getpass
+        env["LOCAL_OVERLEAF_EMAIL"] = env.get("LOCAL_OVERLEAF_EMAIL") or input("TeXnest e-mail: ").strip()
+        env["LOCAL_OVERLEAF_PASSWORD"] = env.get("LOCAL_OVERLEAF_PASSWORD") or getpass.getpass("TeXnest password: ")
     return env.get("LOCAL_OVERLEAF_URL") or default_local_url(), env["LOCAL_OVERLEAF_EMAIL"], env["LOCAL_OVERLEAF_PASSWORD"]
 
 

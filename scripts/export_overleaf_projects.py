@@ -20,7 +20,7 @@ from http.cookiejar import CookieJar
 from pathlib import Path
 
 BASE = "https://www.overleaf.com"
-UA = "Mozilla/5.0 (X11; Linux x86_64) overleaf-local-migration/1.0"
+UA = "Mozilla/5.0 (X11; Linux x86_64) texnest-export/1.0"
 
 
 def log(msg):
