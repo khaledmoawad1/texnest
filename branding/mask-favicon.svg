@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Safari pinned-tab mask: single colour silhouette of the chevrons -->
+  <path d="M14 20 L32 36 L50 20" fill="none" stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 31 L32 43 L45 31" fill="none" stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 42 L32 50 L40 42" fill="none" stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

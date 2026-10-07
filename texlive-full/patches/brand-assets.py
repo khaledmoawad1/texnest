@@ -14,8 +14,16 @@ LOCKUP, LOCKUP_DARK = f"{SRC}/texnest-lockup.svg", f"{SRC}/texnest-lockup-dark.s
 # TeXnest's own files, referenced by the theme and the navbar settings
 for f in ("texnest.svg", "texnest-mark-dark.svg", "texnest-lockup.svg", "texnest-lockup-dark.svg"):
     shutil.copy(f"{SRC}/{f}", f"{PUB}/img/{f}")
-for f in ("favicon.svg", "favicon.ico", "favicon-16x16.png", "favicon-32x32.png", "apple-touch-icon.png"):
+for f in ("favicon.svg", "favicon.ico", "favicon-16x16.png", "favicon-32x32.png", "apple-touch-icon.png",
+          "favicon-compiling.svg", "favicon-compiled.svg", "favicon-error.svg", "mask-favicon.svg"):
     shutil.copy(f"{SRC}/{f}", f"{PUB}/{f}")
+shutil.copy(f"{SRC}/favicon.ico", f"{PUB}/sl-favicon.ico")          # legacy names still shipped by Overleaf
+shutil.copy(f"{SRC}/mask-favicon.svg", f"{PUB}/sl-mask-favicon.svg")
+# Safari pinned-tab colour in the page templates
+for path in glob.glob("/overleaf/services/web/app/views/layout/*.pug") + glob.glob("/overleaf/services/web/app/views/*.pug"):
+    t = open(path).read()
+    if 'mask-icon' in t and '#046530' in t:
+        open(path, "w").write(t.replace('#046530', '#2F3E4E'))
 
 # Overleaf's brand images (plain and webpack-hashed names) by stem: mark on light, mark on dark, lockup on light/dark
 REPLACE = {"overleaf-o-dark": MARK, "overleaf-o": MARK, "overleaf-o-grey": MARK_DARK, "overleaf-o-white": MARK_DARK,
