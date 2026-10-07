@@ -1,28 +1,10 @@
 #!/usr/bin/env python3
-"""
-Export ALL of your projects from overleaf.com (source zips + dashboard layout).
+"""Export every project of an overleaf.com account: one zip per project plus manifest.json
+with names, tags, archived/trashed flags, your name and editor settings.
 
-What it saves (into --out, default ./migration):
-  zips/<project_id>.zip          one zip per project (every file: .tex, .bib, images, ...)
-  manifest.json                  everything needed to rebuild the dashboard locally:
-                                 project names, tags (the dashboard "folders"),
-                                 archived / trashed flags, owner / access level, last-updated,
-                                 your name and your editor settings (theme, font, keybindings,
-                                 PDF viewer, spell-check language, ...)
-
-How to authenticate (overleaf.com has a CAPTCHA on the login form, so we reuse
-your browser session instead of a password):
-  1. Log in to https://www.overleaf.com in your browser.
-  2. Open DevTools -> Application (Chrome) / Storage (Firefox) -> Cookies
-     -> https://www.overleaf.com -> copy the VALUE of the cookie named
-     "overleaf_session2".
-  3. Run:
-       python3 scripts/export_overleaf_projects.py --cookie 'PASTE_VALUE_HERE'
-     or put it in the environment:  OVERLEAF_SESSION=... python3 scripts/export_overleaf_projects.py
-
-Only the Python standard library is used, so it runs anywhere.
-Re-running is safe: zips that already exist with a non-zero size are skipped
-unless --force is given.
+Usage: python3 scripts/export_overleaf_projects.py --cookie VALUE
+(VALUE is your overleaf_session2 browser cookie; overleaf.com's login form has a CAPTCHA.)
+Re-running skips zips that already exist. Standard library only.
 """
 import argparse
 import html
@@ -133,8 +115,7 @@ def fetch_dashboard(client):
         tags = json.loads(raw_tags)
     log(f"found {len(projects)} projects and {len(tags)} tags (dashboard folders)")
 
-    # Per-user editor preferences (theme, font, keybindings, PDF viewer, ...) so the
-    # local instance can look exactly like overleaf.com for you.
+    # Editor preferences (theme, font, keybindings, ...) so the local editor looks the same.
     settings = None
     raw_settings = extract_meta(page, "ol-userSettings")
     if raw_settings:
@@ -155,9 +136,7 @@ def fetch_dashboard(client):
 
 
 def fetch_projects_api(client):
-    """Paginated project list used by the React dashboard.
-    Body schema (web/app/src/Features/Project/ProjectListController.mjs):
-      {filters: {}, sort: {by, order}, page: {size?: int, lastId?: objectId}}"""
+    """Paginated project list (POST /api/project with page {size, lastId}), used when the dashboard blob is capped."""
     projects, last_id = [], None
     while True:
         page = {"size": 500}

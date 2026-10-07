@@ -1,7 +1,5 @@
-# Included automatically by overleaf-toolkit/bin/docker-compose. Paths are relative
-# to overleaf-toolkit/lib. Loads the git-ignored local.env (secrets + personal
-# overrides) after variables.env, and mounts the TeXnest logo + favicons over the
-# Overleaf ones inside the web app's static folder.
+# Loaded automatically by the toolkit; paths are relative to overleaf-toolkit/lib.
+# Adds the git-ignored local.env (its values win) and mounts the TeXnest logo and favicons.
 services:
   sharelatex:
     env_file:
