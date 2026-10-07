@@ -1,0 +1,4 @@
+# The image build only needs the branding sources and the image recipe.
+*
+!branding/**
+!texlive-full/**

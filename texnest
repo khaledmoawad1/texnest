@@ -44,7 +44,7 @@ case "${1:-help}" in
        && [[ "$(head -n1 "$TK/config/version")" == *-with-texlive-full ]]; then
       echo "image sharelatex/sharelatex:$(head -n1 "$TK/config/version") is not built yet; run ./texnest build-texlive first (≈30 min)"; exit 1
     fi
-    "$TK/bin/up" -d; echo; echo "TeXnest is at $URL  (local mailbox: http://localhost:8091)"; ;;
+    "$TK/bin/up" -d; echo; echo "TeXnest is at $URL"; ;;
   bootstrap) echo "layout OK: toolkit present, config linked"; "$TK/bin/doctor" | tail -n 4 ;;
   install)
     "$0" bootstrap
@@ -56,7 +56,7 @@ case "${1:-help}" in
   start)    "$TK/bin/start"; echo "TeXnest is at $URL" ;;
   stop)     "$TK/bin/stop" ;;
   restart)  "$TK/bin/stop"; "$TK/bin/start"; echo "TeXnest is at $URL" ;;
-  status)   docker ps -a --filter name=sharelatex --filter name=mongo --filter name=redis --filter name=^mail$ \
+  status)   docker ps -a --filter name=sharelatex --filter name=mongo --filter name=redis \
               --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'; echo; echo "URL: $URL"; ;;
   logs)     shift; "$TK/bin/logs" -f "${@:-web}" ;;
   shell)    "$TK/bin/shell" ;;
@@ -131,7 +131,7 @@ EOF
     ver="$(head -n1 "$TK/config/version" | sed 's/-with-texlive-full//')"
     echo "building sharelatex/sharelatex:${ver}-with-texlive-full from base ${ver} ..."
     docker build --build-arg BASE_VERSION="$ver" --build-arg TL_MIRROR="${TL_MIRROR:-https://mirror.dogado.de/tex-archive/systems/texlive/tlnet}" \
-      -t "sharelatex/sharelatex:${ver}-with-texlive-full" "$ROOT/texlive-full/" 2>&1 | tee "$ROOT/logs/build-texlive-full-$ver.log"
+      -f "$ROOT/texlive-full/Dockerfile" -t "sharelatex/sharelatex:${ver}-with-texlive-full" "$ROOT" 2>&1 | tee "$ROOT/logs/build-texlive-full-$ver.log"
     echo "${ver}-with-texlive-full" > "$TK/config/version"
     echo "config/version set to ${ver}-with-texlive-full; run ./texnest up to switch to it"
     ;;

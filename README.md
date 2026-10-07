@@ -27,9 +27,7 @@ cd texnest
 ./texnest admin you@example.com    # creates your account and prints a link to set the password
 ```
 
-Open the printed link, choose a password, and go to **<http://localhost:8090>**. TeXnest starts again by itself after a reboot.
-
-TeXnest comes with a local mailbox at **<http://localhost:8091>**: every e-mail it sends (password resets, project invitations) lands there, so "Forgot your password?" works without any mail account. The footer links to it.
+Open the printed link, choose a password, and go to **<http://localhost:8090>**. TeXnest starts again by itself after a reboot. Forgot the password? "Forgot your password?" on the login page takes you straight to choosing a new one.
 
 The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./texnest up`.
 
@@ -37,13 +35,13 @@ The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./te
 
 | Command | What it does |
 |---|---|
-| `./texnest status` | shows the containers (sharelatex, mongo, redis, mail) and the URL |
+| `./texnest status` | shows the three containers (sharelatex, mongo, redis) and the URL |
 | `./texnest up` / `stop` / `restart` | start (also applies config changes), stop, restart |
 | `./texnest logs` | follows the web log; `./texnest logs clsi` follows the compiler |
 | `./texnest backup` | full backup into `backups/<date>/` |
 | `./texnest restore backups/<date>` | brings a backup back |
 | `./texnest user someone@example.com` | adds a user (create accounts for people you trust); `admin` instead of `user` makes an administrator |
-| `./texnest reset-password you@example.com` | prints a link to set a new password (the same link also arrives in the local mailbox) |
+| `./texnest reset-password you@example.com` | prints a link to set a new password |
 | `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
 | `./texnest theme '#2F3E4E' '#D9A21B'` | recolors the interface from a primary and an accent color |
 | `./texnest help` | lists all commands |
@@ -90,7 +88,7 @@ Settings live in `config/`; personal values go in `config/local.env`, which is c
 - **Port**: `OVERLEAF_PORT` in `config/overleaf.rc`, plus `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env`.
 - **Name, logo and colors**: `OVERLEAF_APP_NAME` and `OVERLEAF_NAV_TITLE` in `variables.env`; the files in `branding/`; `./texnest theme '#PRIMARY' '#ACCENT'` recolors the interface.
 - **Other devices on your network**: `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`.
-- **E-mail**: by default all e-mail goes to the local mailbox (<http://localhost:8091>). To send real e-mail instead, put your SMTP settings in `local.env` (`config/local.env.example` shows a Gmail example).
+- **Password reset without e-mail**: on by default (`TEXNEST_DIRECT_PASSWORD_RESET=true`). If other people can reach your TeXnest over the network, set it to `false` and put SMTP settings in `local.env` (`config/local.env.example` shows a Gmail example) so resets go by e-mail.
 - **Extra packages or tools**: add them to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up`.
 
 ## License and credits
