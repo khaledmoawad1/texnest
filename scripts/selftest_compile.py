@@ -21,6 +21,17 @@ ROOT = Path(__file__).resolve().parent.parent
 CASES = [("pdflatex", "pdflatex"), ("xelatex", "xelatex"), ("beamer", "pdflatex")]  # (folder, compiler)
 
 
+def default_local_url():
+    """http://localhost:<OVERLEAF_PORT from config/overleaf.rc>, or http://localhost when unset or 80."""
+    rc = Path(__file__).resolve().parent.parent / "config" / "overleaf.rc"
+    port = "80"
+    if rc.exists():
+        for line in rc.read_text().splitlines():
+            if line.startswith("OVERLEAF_PORT="):
+                port = line.split("=", 1)[1].strip() or "80"
+    return "http://localhost" if port == "80" else f"http://localhost:{port}"
+
+
 def creds():
     env = {k: os.environ.get(k) for k in ("LOCAL_OVERLEAF_URL", "LOCAL_OVERLEAF_EMAIL", "LOCAL_OVERLEAF_PASSWORD")}
     f = ROOT / "migration" / ".local-credentials"
@@ -32,7 +43,7 @@ def creds():
                 env[k] = env[k] or v.strip()
     if not env.get("LOCAL_OVERLEAF_EMAIL") or not env.get("LOCAL_OVERLEAF_PASSWORD"):
         sys.exit("no credentials: set LOCAL_OVERLEAF_EMAIL/PASSWORD or create migration/.local-credentials")
-    return env.get("LOCAL_OVERLEAF_URL") or "http://localhost", env["LOCAL_OVERLEAF_EMAIL"], env["LOCAL_OVERLEAF_PASSWORD"]
+    return env.get("LOCAL_OVERLEAF_URL") or default_local_url(), env["LOCAL_OVERLEAF_EMAIL"], env["LOCAL_OVERLEAF_PASSWORD"]
 
 
 class Client:
