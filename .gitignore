@@ -1,0 +1,11 @@
+# runtime data, logs, backups and private material never belong in git
+backups/
+logs/
+migration/*
+!migration/.gitkeep
+config/local.env
+config/__old-version
+private/
+*.part
+__pycache__/
+.DS_Store

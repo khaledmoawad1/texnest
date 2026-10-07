@@ -1,0 +1,8 @@
+# Included automatically by overleaf-toolkit/bin/docker-compose. Paths are relative
+# to overleaf-toolkit/lib. Loads the git-ignored local.env (secrets + personal
+# overrides) after variables.env, so values in local.env win.
+services:
+  sharelatex:
+    env_file:
+      - ../config/variables.env
+      - ../config/local.env
