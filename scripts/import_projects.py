@@ -24,6 +24,17 @@ def log(msg):
     print(time.strftime("%H:%M:%S"), msg, flush=True)
 
 
+def default_local_url():
+    """http://localhost:<OVERLEAF_PORT from config/overleaf.rc>, or http://localhost when unset or 80."""
+    rc = Path(__file__).resolve().parent.parent / "config" / "overleaf.rc"
+    port = "80"
+    if rc.exists():
+        for line in rc.read_text().splitlines():
+            if line.startswith("OVERLEAF_PORT="):
+                port = line.split("=", 1)[1].strip() or "80"
+    return "http://localhost" if port == "80" else f"http://localhost:{port}"
+
+
 class Local:
     def __init__(self, base):
         self.base = base.rstrip("/")
@@ -185,7 +196,7 @@ class Local:
 def main():
     root = Path(__file__).resolve().parent.parent
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--url", default=os.environ.get("LOCAL_OVERLEAF_URL", "http://localhost"))
+    ap.add_argument("--url", default=os.environ.get("LOCAL_OVERLEAF_URL") or default_local_url())
     ap.add_argument("--email", default=os.environ.get("LOCAL_OVERLEAF_EMAIL"), required="LOCAL_OVERLEAF_EMAIL" not in os.environ)
     ap.add_argument("--password", default=os.environ.get("LOCAL_OVERLEAF_PASSWORD"))
     ap.add_argument("--manifest", default=str(root / "migration" / "manifest.json"))
