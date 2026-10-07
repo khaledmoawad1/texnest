@@ -11,7 +11,7 @@
 #   backup         database dump + project files + config into backups/<stamp>/
 #   restore DIR    replace everything with a backup
 #   user EMAIL     create a user (prints a password-set link); admin EMAIL for an administrator
-#   theme P A      recolor the UI from a primary and an accent color, then rebuild and restart
+#   theme P A [D]  recolor the UI from a primary and an accent (and a dark-chrome primary), then rebuild and restart
 #   build-texlive  build the full TeX Live image for config/version
 set -euo pipefail
 ROOT="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
@@ -99,8 +99,8 @@ case "${1:-help}" in
     echo "restored from $src; TeXnest is at $URL"
     ;;
   theme)
-    [[ -n "${3:-}" ]] || { echo "usage: ./texnest theme '#PRIMARY' '#ACCENT'   (regenerates the UI colors, rebuilds the image and restarts)"; exit 1; }
-    python3 "$ROOT/branding/make_theme.py" --primary "$2" --accent "$3"
+    [[ -n "${3:-}" ]] || { echo "usage: ./texnest theme '#PRIMARY' '#ACCENT' ['#DARK_PRIMARY']   (regenerates the UI colors, rebuilds the image and restarts)"; exit 1; }
+    python3 "$ROOT/branding/make_theme.py" --primary "$2" --accent "$3" ${4:+--dark-primary "$4"}
     "$0" build-texlive && "$0" up && echo "theme applied; hard-refresh the browser (Ctrl+Shift+R) once"
     ;;
   build-texlive)
