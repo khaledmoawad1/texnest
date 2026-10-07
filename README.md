@@ -27,7 +27,7 @@ cd texnest
 ./texnest admin you@example.com    # creates your account and prints a link to set the password
 ```
 
-Open the printed link, choose a password, and go to **<http://localhost:8090>**. TeXnest starts again by itself after a reboot.
+Open the printed link, choose a password, and go to **<http://localhost:8090>**. TeXnest starts again by itself after a reboot. Forgot the password later? `./texnest reset-password you@example.com` prints a new link.
 
 The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./texnest up`.
 
@@ -41,6 +41,7 @@ The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./te
 | `./texnest backup` | full backup into `backups/<date>/` |
 | `./texnest restore backups/<date>` | brings a backup back |
 | `./texnest user someone@example.com` | adds a user (create accounts for people you trust); `admin` instead of `user` makes an administrator |
+| `./texnest reset-password you@example.com` | prints a link to set a new password (TeXnest sends no e-mail unless you configure SMTP) |
 | `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
 | `./texnest theme '#2F3E4E' '#D9A21B'` | recolors the interface from a primary and an accent color |
 | `./texnest help` | lists all commands |
@@ -87,7 +88,7 @@ Settings live in `config/`; personal values go in `config/local.env`, which is c
 - **Port**: `OVERLEAF_PORT` in `config/overleaf.rc`, plus `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env`.
 - **Name, logo and colors**: `OVERLEAF_APP_NAME` and `OVERLEAF_NAV_TITLE` in `variables.env`; the files in `branding/`; `./texnest theme '#PRIMARY' '#ACCENT'` recolors the interface.
 - **Other devices on your network**: `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`.
-- **E-mail**: fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env`; without it, invite and password links are printed by `./texnest user` or written to `overleaf-toolkit/data/logs/web.log`.
+- **E-mail**: fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env` if you want invitation and password-reset e-mails; without it, use `./texnest user` and `./texnest reset-password`, which print the links.
 - **Extra packages or tools**: add them to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up`.
 
 ## License and credits
