@@ -1,159 +1,108 @@
-<p align="center"><img src="branding/texnest-512.png" width="96" alt="TeXnest logo"></p>
+<p align="center"><img src="branding/texnest-512.png" width="96" alt="TeXnest"></p>
 
-# TeXnest — host your own Overleaf alternative
+# TeXnest — run Overleaf locally on your own device
 
-TeXnest runs the open-source **Overleaf Community Edition** on your own machine
-with one command, and adds what the plain edition is missing:
+TeXnest is a **self-hosted LaTeX server**. It gives you the Overleaf editor, dashboard and compiler on your own computer: the same workflow you know from overleaf.com, with the complete TeX Live, no project or collaborator limits, and your files kept on your device. It works offline, starts with one command, and can import everything from your overleaf.com account.
 
-- the **complete TeX Live** (every CTAN package), biber, minted, TikZ/pgfplots
-  with gnuplot, the svg package with Inkscape, EPS figures, system fonts for
-  XeLaTeX/LuaLaTeX, shell escape — so projects that compile on overleaf.com
-  compile here;
-- scripts that **move all your overleaf.com projects** (with tags, archived
-  state, your name and editor settings) to your instance in two commands;
-- backup, restore, upgrade and a compile self-test, all through `./texnest`.
+## Why TeXnest
 
-Same editor, same project dashboard, same history. Your files never leave your
-computer. Works offline.
-
-> TeXnest is a packaging of Overleaf Community Edition (AGPL-3.0). It is not
-> affiliated with or endorsed by Overleaf. "Overleaf" is a trademark of Overleaf.
+- **Self-hosted.** Everything runs on your machine in Docker. Your documents never leave it.
+- **Complete TeX Live.** Every CTAN package, biber, minted, TikZ/pgfplots with gnuplot, the svg package with Inkscape, EPS figures, system fonts for XeLaTeX and LuaLaTeX, shell escape. What compiles on overleaf.com compiles here.
+- **Your projects, moved in two commands.** Projects, tags, archived state, your name and your editor settings come over from overleaf.com.
+- **One command for everything.** Install, start, backup, restore, update, users and a compile self-test through `./texnest`.
+- **The real Overleaf.** TeXnest packages the open-source Overleaf Community Edition, so the editor, project history, sharing and dashboard are the ones you already use.
 
 ## Requirements
 
-- Linux (tested on Ubuntu 24.04). macOS with Docker Desktop should work too.
-- Docker 24+ with the compose plugin, your user in the `docker` group
-  (`docker ps` works without sudo).
-- `git`, `python3` (3.8+, standard library only), ~15 GB of free disk
-  (the image is ~8 GB), 4 GB RAM.
-- Port 80 free (changeable, see *Customize*).
+- Linux with Docker 24+ and the compose plugin, your user in the `docker` group (`docker ps` works without sudo). macOS with Docker Desktop should work as well.
+- `git` and `python3` (3.8+, standard library only).
+- About 15 GB of free disk (the image is 8 GB) and 4 GB of RAM.
 
 ## Install
 
 ```bash
 git clone --recurse-submodules https://github.com/khaledmoawad1/texnest.git
 cd texnest
-./texnest install        # builds the TeX Live image (~30 min, downloads ~3 GB) and starts everything
-./texnest admin you@example.com   # creates your admin account and prints a link to set the password
+./texnest install                  # builds the TeX Live image (about 30 minutes) and starts TeXnest
+./texnest admin you@example.com    # creates your account and prints a link to set the password
 ```
 
-Open the printed link, set your password, then go to <http://localhost>.
-That's it. TeXnest restarts by itself after a reboot.
+Open the printed link, choose a password, and go to **<http://localhost:8090>**. TeXnest starts again by itself after a reboot.
 
-Step by step, the same thing is: `./texnest bootstrap` (fetch the Overleaf
-toolkit, link the config), `./texnest build-texlive`, `./texnest up`.
+The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./texnest up`.
 
-## Everyday commands
+## Everyday use
 
-| | |
+| Command | What it does |
 |---|---|
-| `./texnest status` | is it running? (three containers: sharelatex, mongo, redis) |
-| `./texnest up` / `stop` / `restart` | start (also applies config changes) / stop / restart |
-| `./texnest logs` | follow the web log (`./texnest logs clsi` for the compiler) |
-| `./texnest backup` | full backup into `backups/<date>/` (database + all project files + config) |
-| `./texnest restore backups/<date>` | replace everything with that backup |
-| `./texnest user someone@example.com` | add a user (`admin` instead of `user` for an administrator) |
-| `./texnest selftest` | compile three test projects (biber, minted, svg, fonts, beamer); exit 0 = all good |
-| `./texnest doctor` | the toolkit's self-check |
-| `./texnest shell` | root shell inside the Overleaf container |
-| `./texnest help` | all commands |
+| `./texnest status` | shows the three containers (sharelatex, mongo, redis) and the URL |
+| `./texnest up` / `stop` / `restart` | start (also applies config changes), stop, restart |
+| `./texnest logs` | follows the web log; `./texnest logs clsi` follows the compiler |
+| `./texnest backup` | full backup into `backups/<date>/` |
+| `./texnest restore backups/<date>` | brings a backup back |
+| `./texnest user someone@example.com` | adds a user; `admin` instead of `user` makes an administrator |
+| `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
+| `./texnest help` | lists all commands |
 
-Using it is just Overleaf: *New project* (blank, example or *Upload project* from a
-zip), *Recompile*, *Menu* → compiler / main document / download PDF, *Share*,
-*History*, tags in the left sidebar.
+Inside TeXnest it is Overleaf: *New project* (blank, example or *Upload project* from a zip), *Recompile*, *Menu* for the compiler, main document and PDF download, *Share*, *History*, and tags in the left sidebar.
 
-## Bring your projects from overleaf.com
+## Move your projects from overleaf.com
 
-overleaf.com puts a CAPTCHA on its login page, so the exporter reuses your browser
-session instead of asking for a password.
-
-1. Log in to overleaf.com in your browser. Open the developer tools (F12) →
-   *Application* (Chrome/Edge) or *Storage* (Firefox) → *Cookies* →
-   `https://www.overleaf.com` → copy the **value** of the cookie `overleaf_session2`.
-2. Download everything (one zip per project, plus `migration/manifest.json` with
-   names, tags, archived/trashed flags, your name and editor settings):
+1. Log in to overleaf.com in your browser. Open the developer tools (F12) → *Application* (Chrome, Edge) or *Storage* (Firefox) → *Cookies* → `https://www.overleaf.com` → copy the **value** of the cookie `overleaf_session2`.
+2. Download everything (one zip per project plus `migration/manifest.json` with names, tags, flags and settings):
 
    ```bash
    python3 scripts/export_overleaf_projects.py --cookie 'PASTE_VALUE'
    ```
 
-   Add `--include-trashed` to take the Trash too. Re-running skips what you already have.
-3. Import into TeXnest (asks for your TeXnest password; or set
-   `LOCAL_OVERLEAF_EMAIL` / `LOCAL_OVERLEAF_PASSWORD` in the environment):
+   Add `--include-trashed` to take the Trash as well. Running it again only fetches what is new.
+3. Import into TeXnest:
 
    ```bash
    python3 scripts/import_projects.py --email you@example.com
    ```
 
-   It uploads every project, recreates your tags, archived/trashed state, your
-   name and editor preferences. Overleaf allows 20 uploads per minute, so ~200
-   projects take about 10 minutes. Re-running never creates duplicates.
-4. Open <http://localhost/project>. If a project used XeLaTeX or LuaLaTeX on
-   overleaf.com, set that once in its *Menu* (the zip doesn't carry that setting).
-
-Not included in a zip export: project history, chat and comments.
+   Every project is uploaded and your tags, archived state, name and editor preferences are recreated. About 200 projects take ten minutes. Running it again never creates duplicates.
+4. Open <http://localhost:8090/project>. For a project that used XeLaTeX or LuaLaTeX, pick that compiler once in its *Menu*.
 
 ## Backup and restore
 
-`./texnest backup` writes `backups/texnest-backup-<date>/` with a MongoDB dump,
-an archive of all project files and history, and your config. Copy that folder
-somewhere safe. `./texnest restore <folder>` puts it back (also on a new machine,
-after `./texnest install`).
+`./texnest backup` writes `backups/texnest-backup-<date>/` with the database, all project files and history, and your configuration. Keep a copy somewhere safe. `./texnest restore <folder>` brings it back, also on a new machine after `./texnest install`.
 
 ## Update
 
 ```bash
 ./texnest backup
-cd overleaf-toolkit && bin/upgrade && cd ..   # new toolkit + new Overleaf version number
+cd overleaf-toolkit && bin/upgrade && cd ..     # new toolkit and Overleaf version
 ./texnest build-texlive && ./texnest up && ./texnest selftest
 ```
 
-Read the release notes first: <https://github.com/overleaf/overleaf/wiki/Release-Notes-6.x>.
+Release notes: <https://github.com/overleaf/overleaf/wiki/Release-Notes-6.x>.
 
 ## Customize
 
-Everything is in `config/`. Put personal values in `config/local.env` (created on
-first run, never committed); it overrides `config/variables.env`. After any
-change run `./texnest up`.
+Settings live in `config/`. Personal values belong in `config/local.env` (created on first run, never committed); it overrides `config/variables.env`. Run `./texnest up` after a change.
 
-| I want to… | Do |
+| Goal | Setting |
 |---|---|
-| use my own name and logo | `OVERLEAF_APP_NAME`, `OVERLEAF_NAV_TITLE`, `OVERLEAF_HEADER_IMAGE_URL` in `variables.env`; replace the files in `branding/` (they are mounted into the app) |
-| another port | `OVERLEAF_PORT=8080` in `config/overleaf.rc`, `OVERLEAF_SITE_URL=http://localhost:8080` in `local.env` |
-| reach it from other devices on my network | `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc`, `OVERLEAF_SITE_URL=http://<your-ip>` in `local.env`. Use the toolkit's TLS proxy (`overleaf-toolkit/doc/tls-proxy.md`) for HTTPS |
-| longer compiles (default 3 min, max 10) | `./texnest shell`, then `cd /overleaf/services/web && node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=<id> --compile-timeout=600` (user ids are at <http://localhost/admin/user>) |
-| send e-mails (invites, password resets) | fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env`. Without SMTP, links are printed by `./texnest user` or written to `overleaf-toolkit/data/logs/web.log` |
-| an extra LaTeX package or tool | add it to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up` (temporary: `./texnest shell`, `tlmgr install <pkg> && tlmgr path add`) |
+| Another port | `OVERLEAF_PORT` in `config/overleaf.rc` and `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env` |
+| Your own name and logo | `OVERLEAF_APP_NAME`, `OVERLEAF_NAV_TITLE`, `OVERLEAF_HEADER_IMAGE_URL` in `variables.env`; replace the files in `branding/` |
+| Use it from other devices on your network | `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`; the toolkit's TLS proxy adds HTTPS (`overleaf-toolkit/doc/tls-proxy.md`) |
+| Longer compiles (default 3 min, up to 10) | `./texnest shell`, then `cd /overleaf/services/web && node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=<id> --compile-timeout=600`; user ids are listed at `/admin/user` |
+| E-mail for invites and password resets | fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env`; without SMTP the links are printed by `./texnest user` or written to `overleaf-toolkit/data/logs/web.log` |
+| Extra packages or tools in the image | add them to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up` |
 
 ## Troubleshooting
 
-- **`mongo` keeps restarting with "kernel versions 6.19 and newer"** — MongoDB
-  8.0/8.3 images refuse new kernels; keep `MONGO_VERSION=8.2.12` (the default here).
-- **Port 80 already in use** — change the port (see *Customize*).
-- **A package is "not found"** — run `./texnest selftest`; if it passes, the project
-  needs a package outside TeX Live (add it to the Dockerfile).
-- **Forgot the password** — <http://localhost/user/password/reset>, then
-  `docker exec sharelatex grep -o 'http://localhost/user/password/set?[^"\\ ]*' /var/log/overleaf/web.log | tail -1`
-  and open that link.
-- **`docker build: unknown flag --progress`** — harmless; the scripts don't use it.
-- Anything else: `./texnest doctor`, `./texnest logs`, and
-  [docs/DECISIONS.md](docs/DECISIONS.md) for how the pieces fit together.
+- **`mongo` restarts with "kernel versions 6.19 and newer"**: keep `MONGO_VERSION=8.2.12` in `config/overleaf.rc` (the default); MongoDB 8.0 and 8.3 images refuse new kernels.
+- **Port 8090 is taken**: change the port as described above.
+- **Forgot the password**: open `/user/password/reset`, submit the e-mail, then run `docker exec sharelatex grep -o 'http://[^"\\ ]*/user/password/set?[^"\\ ]*' /var/log/overleaf/web.log | tail -1` and open that link.
+- **Something else**: `./texnest doctor` and `./texnest logs`. The design notes in [docs/DECISIONS.md](docs/DECISIONS.md) explain how the pieces fit together.
 
-## What's different from overleaf.com
+## Good to know
 
-Community Edition is the same editor and dashboard code with the paid features
-removed: no track changes / comments, no templates gallery (upload any template
-zip instead), no Git/GitHub/Dropbox/Zotero sync, no AI tools, one TeX Live
-version (2026), sharing only with accounts on your instance.
+TeXnest is built for you and the people you trust: accounts you create can compile with shell escape, like on overleaf.com, so share it with colleagues, not with the whole internet. Overleaf Community Edition keeps the editor, history and sharing of overleaf.com; Overleaf's commercial additions (tracked changes, the templates gallery, Git and reference-manager sync) are not part of it.
 
-**Security:** compiles are not sandboxed and shell escape is enabled (as on
-overleaf.com), so anyone with an account can run commands inside the Overleaf
-container. Only create accounts for people you trust, and don't expose TeXnest to
-the internet without the TLS proxy and a good reason.
+## License and credits
 
-## License
-
-TeXnest's own files are released under the **GNU AGPL-3.0** (see `LICENSE`), the
-same license as [Overleaf Community Edition](https://github.com/overleaf/overleaf)
-and the [Overleaf Toolkit](https://github.com/overleaf/toolkit) it is built on.
-TeX Live, the fonts and the tools in the image keep their own free licenses.
+TeXnest is released under the **GNU AGPL-3.0** (see `LICENSE`), the same license as [Overleaf Community Edition](https://github.com/overleaf/overleaf) and the [Overleaf Toolkit](https://github.com/overleaf/toolkit) it is built on. TeX Live, the fonts and the tools inside the image keep their own free licenses. TeXnest is an independent project and is not affiliated with or endorsed by Overleaf; Overleaf is a trademark of Overleaf.
