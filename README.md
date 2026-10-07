@@ -23,7 +23,7 @@ TeXnest is a **self-hosted LaTeX server**. It gives you the Overleaf editor, das
 ```bash
 git clone --recurse-submodules https://github.com/khaledmoawad1/texnest.git
 cd texnest
-./texnest install                  # builds the TeX Live image (about 30 minutes) and starts TeXnest
+./texnest install                  # builds the TeX Live image and starts TeXnest
 ./texnest admin you@example.com    # creates your account and prints a link to set the password
 ```
 
@@ -40,7 +40,7 @@ The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./te
 | `./texnest logs` | follows the web log; `./texnest logs clsi` follows the compiler |
 | `./texnest backup` | full backup into `backups/<date>/` |
 | `./texnest restore backups/<date>` | brings a backup back |
-| `./texnest user someone@example.com` | adds a user; `admin` instead of `user` makes an administrator |
+| `./texnest user someone@example.com` | adds a user (create accounts for people you trust); `admin` instead of `user` makes an administrator |
 | `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
 | `./texnest help` | lists all commands |
 
@@ -79,29 +79,9 @@ cd overleaf-toolkit && bin/upgrade && cd ..     # new toolkit and Overleaf versi
 
 Release notes: <https://github.com/overleaf/overleaf/wiki/Release-Notes-6.x>.
 
-## Customize
+## Configuration
 
-Settings live in `config/`. Personal values belong in `config/local.env` (created on first run, never committed); it overrides `config/variables.env`. Run `./texnest up` after a change.
-
-| Goal | Setting |
-|---|---|
-| Another port | `OVERLEAF_PORT` in `config/overleaf.rc` and `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env` |
-| Your own name and logo | `OVERLEAF_APP_NAME`, `OVERLEAF_NAV_TITLE`, `OVERLEAF_HEADER_IMAGE_URL` in `variables.env`; replace the files in `branding/` |
-| Use it from other devices on your network | `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`; the toolkit's TLS proxy adds HTTPS (`overleaf-toolkit/doc/tls-proxy.md`) |
-| Longer compiles (default 3 min, up to 10) | `./texnest shell`, then `cd /overleaf/services/web && node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=<id> --compile-timeout=600`; user ids are listed at `/admin/user` |
-| E-mail for invites and password resets | fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env`; without SMTP the links are printed by `./texnest user` or written to `overleaf-toolkit/data/logs/web.log` |
-| Extra packages or tools in the image | add them to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up` |
-
-## Troubleshooting
-
-- **`mongo` restarts with "kernel versions 6.19 and newer"**: keep `MONGO_VERSION=8.2.12` in `config/overleaf.rc` (the default); MongoDB 8.0 and 8.3 images refuse new kernels.
-- **Port 8090 is taken**: change the port as described above.
-- **Forgot the password**: open `/user/password/reset`, submit the e-mail, then run `docker exec sharelatex grep -o 'http://[^"\\ ]*/user/password/set?[^"\\ ]*' /var/log/overleaf/web.log | tail -1` and open that link.
-- **Something else**: `./texnest doctor` and `./texnest logs`. The design notes in [docs/DECISIONS.md](docs/DECISIONS.md) explain how the pieces fit together.
-
-## Good to know
-
-TeXnest is built for you and the people you trust: accounts you create can compile with shell escape, like on overleaf.com, so share it with colleagues, not with the whole internet. Overleaf Community Edition keeps the editor, history and sharing of overleaf.com; Overleaf's commercial additions (tracked changes, the templates gallery, Git and reference-manager sync) are not part of it.
+Settings live in `config/`; personal values go in `config/local.env`, which is created on first run and never committed. Port, name and logo, access from other devices, compile time, e-mail and extra packages are covered in [docs/CONFIGURATION.md](docs/CONFIGURATION.md), together with troubleshooting.
 
 ## License and credits
 
