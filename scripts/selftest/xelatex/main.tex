@@ -1,0 +1,12 @@
+\documentclass{article}
+\usepackage{fontspec}
+\setmainfont{Liberation Serif}
+\setsansfont{Carlito}
+\setmonofont{DejaVu Sans Mono}
+\usepackage{polyglossia}\setdefaultlanguage{english}\setotherlanguage{turkish}
+\usepackage{unicode-math}
+\begin{document}
+XeLaTeX with system fonts: Liberation Serif, {\sffamily Carlito}, {\ttfamily DejaVu Sans Mono}.
+\begin{turkish}Türkçe karakterler: ğüşıöçĞÜŞİÖÇ\end{turkish}
+$\int_0^1 x^2\,\mathrm{d}x = \tfrac{1}{3}$
+\end{document}
