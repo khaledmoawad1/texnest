@@ -1,23 +1,9 @@
 #!/usr/bin/env python3
-"""
-Import projects (zips) into the LOCAL Overleaf instance and rebuild the dashboard layout.
+"""Import the exported projects into TeXnest and rebuild tags, archived/trashed state,
+your name and editor settings.
 
-Reads migration/manifest.json (written by export_overleaf_projects.py) and, for
-each project that has a zip:
-  * uploads the zip through the same endpoint the "Upload Project" button uses
-    (POST /project/new/upload), giving it the original project name,
-  * re-creates every tag (the dashboard folders) and puts the projects in them,
-  * re-applies the archived / trashed flags,
-  * copies your name and editor preferences (theme, font, keybindings, PDF viewer,
-    spell-check language, ...) so the editor looks the same as on overleaf.com,
-  * records old-id -> new-id in migration/import-state.json so re-running the
-    script never creates duplicates (already-imported projects are skipped).
-
-Usage:
-  python3 scripts/import_projects.py --email you@example.com --password '...'
-  (defaults: --url http://localhost, manifest + zips under ./migration)
-
-Only the Python standard library is used.
+Usage: python3 scripts/import_projects.py --email you@example.com
+Re-running is safe: migration/import-state.json records what was already imported.
 """
 import argparse
 import json
@@ -59,8 +45,7 @@ class Local:
             return r.geturl(), r.read().decode("utf-8", "replace")
 
     def refresh_csrf(self, path="/project"):
-        """CSRF token is sent in the x-csrf-token header (never in bodies: several
-        endpoints use strict schemas that reject unknown body keys)."""
+        """Fetch a CSRF token; it is sent as the x-csrf-token header because some endpoints reject it in the body."""
         _, page = self.get_text(path)
         m = re.search(r'<meta\s+name="ol-csrfToken"\s+content="([^"]+)"', page)
         if not m:
@@ -136,8 +121,7 @@ class Local:
         return json.loads(html.unescape(m.group(1)))
 
     def upload_zip(self, zip_path, name, max_wait=1800):
-        """Upload a project zip. Overleaf rate-limits this endpoint (HTTP 429), so on
-        429 we wait (Retry-After header, else 60 s) and try again, for up to max_wait s."""
+        """Upload a project zip, waiting and retrying on HTTP 429 (Overleaf allows 20 uploads per minute)."""
         waited = 0
         while True:
             try:

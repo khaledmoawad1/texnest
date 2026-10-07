@@ -1,22 +1,9 @@
-# Overleaf Community Edition + complete TeX Live + the extra tools overleaf.com's
-# compile environment has (biber, pygments for minted, inkscape for svg,
-# gnuplot for pgfplots, common system fonts for XeLaTeX/LuaLaTeX).
-#
-# Build (from the repo root):
-#   docker build -t sharelatex/sharelatex:6.3.0-with-texlive-full texlive-full/
-# then set overleaf-toolkit/config/version to 6.3.0-with-texlive-full and run bin/up -d.
-#
-# On an Overleaf upgrade: change BASE_VERSION, rebuild, retag, update config/version.
+# Overleaf Community Edition plus the complete TeX Live and the tools overleaf.com's compiler has.
+# Built by `./texnest build-texlive`; change BASE_VERSION on an Overleaf upgrade.
 ARG BASE_VERSION=6.3.0
 FROM sharelatex/sharelatex:${BASE_VERSION}
 
-# --- system extras ---------------------------------------------------------
-# fonts-liberation       : metric-compatible Arial / Times New Roman / Courier New
-# fonts-crosextra-*      : metric-compatible Calibri (Carlito) / Cambria (Caladea)
-# fonts-dejavu, noto, freefont : broad Unicode coverage for XeLaTeX / LuaLaTeX
-# python3-pygments       : pygmentize, required by the minted package
-# inkscape               : required by the svg package (\includesvg)
-# gnuplot-nox            : gnuplot back-end for pgfplots / gnuplottex
+# System fonts for XeLaTeX/LuaLaTeX, Pygments for minted, Inkscape for svg, gnuplot for pgfplots.
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       fontconfig \
@@ -28,11 +15,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && fc-cache -f
 
-# --- complete TeX Live -----------------------------------------------------
-# Docs and sources are skipped (as on overleaf.com) to keep the image ~5 GB
-# instead of ~8 GB. The install is retried because a single mirror hiccup
-# would otherwise discard the whole layer; already-installed packages are
-# skipped on retry.
+# Complete TeX Live without docs/sources; the install is retried because one mirror error would discard the layer.
 ARG TL_MIRROR=https://mirror.dogado.de/tex-archive/systems/texlive/tlnet
 RUN tlmgr option repository "${TL_MIRROR}" \
  && tlmgr option docfiles 0 \
@@ -51,28 +34,17 @@ RUN tlmgr option repository "${TL_MIRROR}" \
  && (luaotfload-tool -u -f >/dev/null 2>&1 || true) \
  && (mtxrun --generate >/dev/null 2>&1 || true)
 
-# --- unrestricted shell escape, as on overleaf.com ------------------------
-# The Overleaf compiler service runs latexmk without -shell-escape, so TeX Live's
-# default "restricted" mode (shell_escape = p) applies: only allow-listed helpers
-# (latexminted, bibtex, kpsewhich, ...) may run. overleaf.com enables full shell
-# escape, which pgfplots+gnuplot, the svg package (inkscape), gnuplottex, epstopdf
-# of arbitrary files etc. need. Set it in the installation-root texmf.cnf, which
-# TeX Live reads as the local override of texmf-dist/web2c/texmf.cnf.
-# (Verified 2026-10-05: pgfplots+gnuplot, svg+inkscape and minted all compile.)
+# Unrestricted shell escape like overleaf.com, so pgfplots+gnuplot and svg+inkscape work (Overleaf's compiler does not pass -shell-escape).
 RUN TL_ROOT="$(ls -d /usr/local/texlive/20*)" \
  && printf '%s\n' '% enable unrestricted shell escape (overleaf.com behaviour)' 'shell_escape = t' >> "$TL_ROOT/texmf.cnf" \
  && [ "$(kpsewhich -var-value shell_escape)" = "t" ]
 
-# --- converters found missing when compiling real projects (2026-10-05) ------
-# ghostscript : required by epstopdf/repstopdf for EPS figures (MDPI template logo
-#               failed with "logo-mdpi-eps-converted-to.pdf not found")
-# imagemagick : `convert`, used by some packages/templates via shell escape
-# Kept as a separate layer so the big TeX Live layer above stays cached.
+# Ghostscript for EPS figures (epstopdf) and ImageMagick, kept in their own layer so the TeX Live layer stays cached.
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ghostscript imagemagick \
  && rm -rf /var/lib/apt/lists/*
 
-# sanity check: every tool overleaf.com projects commonly rely on must exist
+# Fail the build if any required tool is missing.
 RUN set -e; for b in pdflatex xelatex lualatex latexmk biber bibtex makeindex \
       makeglossaries xindy pygmentize inkscape gnuplot gs convert; do \
       command -v "$b" >/dev/null || { echo "MISSING: $b"; exit 1; }; done \

@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
-"""
-Compile self-test for the local Overleaf: proves the image can build the kinds of
-documents used on overleaf.com. Run after every upgrade / image rebuild:
+"""Upload, compile and delete three test projects to prove the image compiles real documents.
 
-    ./overleaf selftest            (or: python3 scripts/selftest_compile.py)
-
-For each folder in scripts/selftest/ it zips the sources, uploads them as a
-project (same endpoint as the dashboard's "Upload Project"), sets the compiler,
-compiles, checks that a PDF was produced with no LaTeX errors, and deletes the
-project again. Exit code 0 = everything passed.
-
-Credentials: env LOCAL_OVERLEAF_URL / LOCAL_OVERLEAF_EMAIL / LOCAL_OVERLEAF_PASSWORD,
-or migration/.local-credentials (written at setup time).
+Usage: ./texnest selftest   (exit code 0 means every project produced a PDF with no errors)
+Credentials come from LOCAL_OVERLEAF_* environment variables or migration/.local-credentials.
 """
 import io
 import json

@@ -1,4 +1,4 @@
-#### TeXnest: Overleaf Toolkit settings (overleaf.rc) ####
+# Overleaf Toolkit settings for TeXnest (see overleaf-toolkit/doc/overleaf-rc.md).
 
 PROJECT_NAME=overleaf
 
@@ -19,7 +19,7 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 MONGO_ENABLED=true
 MONGO_DATA_PATH=data/mongo
 MONGO_IMAGE=mongo
-# 8.2.x works on every kernel; 8.0.x and 8.3.x refuse to start on Linux >= 6.19 (see docs/DECISIONS.md)
+# MongoDB 8.2.x starts on every kernel; 8.0 and 8.3 images refuse Linux 6.19 and newer.
 MONGO_VERSION=8.2.12
 
 # Redis configuration
