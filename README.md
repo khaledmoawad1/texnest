@@ -42,6 +42,7 @@ The same thing in steps: `./texnest bootstrap`, `./texnest build-texlive`, `./te
 | `./texnest restore backups/<date>` | brings a backup back |
 | `./texnest user someone@example.com` | adds a user (create accounts for people you trust); `admin` instead of `user` makes an administrator |
 | `./texnest selftest` | compiles three test projects (biber, minted, svg, fonts, beamer) |
+| `./texnest theme '#2F3E4E' '#D9A21B'` | recolors the interface from a primary and an accent color |
 | `./texnest help` | lists all commands |
 
 Inside TeXnest it is Overleaf: *New project* (blank, example or *Upload project* from a zip), *Recompile*, *Menu* for the compiler, main document and PDF download, *Share*, *History*, and tags in the left sidebar.
@@ -81,7 +82,13 @@ Release notes: <https://github.com/overleaf/overleaf/wiki/Release-Notes-6.x>.
 
 ## Configuration
 
-Settings live in `config/`; personal values go in `config/local.env`, which is created on first run and never committed. Port, name and logo, access from other devices, compile time, e-mail and extra packages are covered in [docs/CONFIGURATION.md](docs/CONFIGURATION.md), together with troubleshooting.
+Settings live in `config/`; personal values go in `config/local.env`, which is created on first run and never committed, and override `config/variables.env`. Run `./texnest up` after a change.
+
+- **Port**: `OVERLEAF_PORT` in `config/overleaf.rc`, plus `OVERLEAF_SITE_URL=http://localhost:<port>` in `local.env`.
+- **Name, logo and colors**: `OVERLEAF_APP_NAME` and `OVERLEAF_NAV_TITLE` in `variables.env`; the files in `branding/`; `./texnest theme '#PRIMARY' '#ACCENT'` recolors the interface.
+- **Other devices on your network**: `OVERLEAF_LISTEN_IP=0.0.0.0` in `overleaf.rc` and `OVERLEAF_SITE_URL=http://<your-ip>:8090` in `local.env`.
+- **E-mail**: fill the `OVERLEAF_EMAIL_SMTP_*` lines in `variables.env`; without it, invite and password links are printed by `./texnest user` or written to `overleaf-toolkit/data/logs/web.log`.
+- **Extra packages or tools**: add them to `texlive-full/Dockerfile`, then `./texnest build-texlive && ./texnest up`.
 
 ## License and credits
 

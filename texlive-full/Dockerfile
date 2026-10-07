@@ -44,6 +44,12 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ghostscript imagemagick \
  && rm -rf /var/lib/apt/lists/*
 
+# TeXnest colors: append the generated theme to Overleaf's compiled stylesheets so the UI follows the logo palette.
+COPY theme.css /tmp/texnest-theme.css
+RUN cd /overleaf/services/web/public/stylesheets \
+ && for f in main-style-*.css pages/ide-*.css ide-detached-*.css; do cat /tmp/texnest-theme.css >> "$f"; done \
+ && rm /tmp/texnest-theme.css
+
 # Fail the build if any required tool is missing.
 RUN set -e; for b in pdflatex xelatex lualatex latexmk biber bibtex makeindex \
       makeglossaries xindy pygmentize inkscape gnuplot gs convert; do \

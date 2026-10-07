@@ -9,3 +9,4 @@ private/
 *.part
 __pycache__/
 .DS_Store
+docs/
