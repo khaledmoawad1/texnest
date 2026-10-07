@@ -10,3 +10,8 @@ private/
 __pycache__/
 .DS_Store
 docs/
+# Markdown files other than the README (notes, drafts) stay local
+*.md
+!README.md
+# editor settings
+.vscode/
