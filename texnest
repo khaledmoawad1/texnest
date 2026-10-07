@@ -11,6 +11,7 @@
 #   backup         database dump + project files + config into backups/<stamp>/
 #   restore DIR    replace everything with a backup
 #   user EMAIL     create a user (prints a password-set link); admin EMAIL for an administrator
+#   reset-password EMAIL   print a link to set a new password (no e-mail server needed)
 #   theme P A [D]  recolor the UI from a primary and an accent (and a dark-chrome primary), then rebuild and restart
 #   build-texlive  build the full TeX Live image for config/version
 set -euo pipefail
@@ -68,6 +69,29 @@ case "${1:-help}" in
     compose exec sharelatex /bin/bash -c \
       "cd /overleaf/services/web && node modules/server-ce-scripts/scripts/create-user.mjs $flag --email='$2'"
     ;;
+  reset-password)
+    [[ -n "${2:-}" ]] || { echo "usage: ./texnest reset-password EMAIL   (prints a link to set a new password)"; exit 1; }
+    python3 - "$URL" "$2" <<'EOF'
+import json, re, sys, time, subprocess, urllib.request, http.cookiejar
+base, email = sys.argv[1], sys.argv[2]
+op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+page = op.open(base + "/user/password/reset").read().decode()
+csrf = re.search(r'<meta\s+name="ol-csrfToken"\s+content="([^"]+)"', page).group(1)
+req = urllib.request.Request(base + "/user/password/reset", data=json.dumps({"email": email}).encode(), method="POST",
+                             headers={"Content-Type": "application/json", "x-csrf-token": csrf, "Accept": "application/json"})
+try:
+    op.open(req)
+except urllib.error.HTTPError as e:
+    sys.exit(f"request failed: HTTP {e.code} {e.read().decode()[:200]}")
+time.sleep(2)
+log = subprocess.run(["docker", "exec", "sharelatex", "grep", "-o", r"http[^\"\\ ]*/user/password/set?[^\"\\ ]*", "/var/log/overleaf/web.log"], capture_output=True, text=True).stdout.split()
+links = [l for l in log if email.replace("@", "%40") in l or email in l]
+if not links:
+    sys.exit("no link found: is the e-mail registered? (./texnest user EMAIL creates accounts)")
+print("Open this link to choose a new password (valid for a limited time):")
+print(" ", links[-1])
+EOF
+    ;;
   backup)
     mkdir -p "$ROOT/backups"
     stamp="$(date +%Y%m%d-%H%M%S)"
@@ -111,5 +135,5 @@ case "${1:-help}" in
     echo "${ver}-with-texlive-full" > "$TK/config/version"
     echo "config/version set to ${ver}-with-texlive-full; run ./texnest up to switch to it"
     ;;
-  *) sed -n "2,16p" "$0" ;;
+  *) sed -n "2,17p" "$0" ;;
 esac

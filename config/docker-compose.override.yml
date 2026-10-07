@@ -7,6 +7,9 @@ services:
       - ../config/local.env
     volumes:
       - ../../branding/texnest.svg:/overleaf/services/web/public/img/texnest.svg:ro
+      - ../../branding/texnest-mark-dark.svg:/overleaf/services/web/public/img/texnest-mark-dark.svg:ro
+      - ../../branding/texnest-lockup.svg:/overleaf/services/web/public/img/texnest-lockup.svg:ro
+      - ../../branding/texnest-lockup-dark.svg:/overleaf/services/web/public/img/texnest-lockup-dark.svg:ro
       - ../../branding/favicon.svg:/overleaf/services/web/public/favicon.svg:ro
       - ../../branding/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
       - ../../branding/favicon-16x16.png:/overleaf/services/web/public/favicon-16x16.png:ro
