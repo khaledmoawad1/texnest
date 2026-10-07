@@ -207,13 +207,21 @@
 [data-theme=default] .modal:not(.modal-themed) .form-range::-moz-range-thumb { background-color: #2f3e4e; }
 [data-theme=default] .modal:not(.modal-themed) .btn-outline-primary { --bs-btn-color: #2f3e4e; --bs-btn-border-color: #2f3e4e; --bs-btn-hover-color: #ffffff; --bs-btn-hover-bg: #2f3e4e; --bs-btn-hover-border-color: #2f3e4e; --bs-btn-active-bg: #202a35; --bs-btn-active-border-color: #202a35; --bs-btn-disabled-color: #2f3e4e; --bs-btn-disabled-border-color: #2f3e4e; }
 [data-theme=default] .modal:not(.modal-themed) .uppy-Dashboard-AddFiles-title button.uppy-Dashboard-browse { --bs-btn-color: #ffffff; --bs-btn-bg: #2f3e4e; --bs-btn-border-color: #2f3e4e; --bs-btn-hover-bg: #202a35; --bs-btn-hover-border-color: #202a35; --bs-btn-active-bg: #12181e; --bs-btn-active-border-color: #12181e; --bs-btn-disabled-bg: #2f3e4e; --bs-btn-disabled-border-color: #2f3e4e; }
-/* Brand assets: navbar lockup (mark + wordmark), the editor's home-button mark, no vendor mark.
-   Selectors match Overleaf's own specificity so they win as the later declaration. */
+/* Brand assets. The lockup follows the navbar's real background (Overleaf's --navbar-bg rules),
+   not its theme switch: the default navbar is dark, "website" navbars are light, and the dashboard's
+   navbar is dark again under the default theme. Selectors match Overleaf's specificity. */
 :root, [data-theme=default], [data-theme=light], [data-theme=dark] { --navbar-brand-width: 172px; }
 .navbar-default .navbar-brand { gap: 0; }
-.navbar-default .navbar-brand .navbar-logo { width: 172px; background-size: contain; background-position: left center; }
+.navbar-default .navbar-brand .navbar-logo { width: 172px; background-size: contain; background-position: left center; background-image: url(/img/texnest-lockup-dark.svg) !important; }
+.website-redesign .navbar-default .navbar-brand .navbar-logo, .website-redesign-navbar .navbar-brand .navbar-logo { background-image: url(/img/texnest-lockup.svg) !important; }
+[data-theme=default] #project-list-root .website-redesign .navbar-default .navbar-brand .navbar-logo, [data-theme=default] #library-root .website-redesign .navbar-default .navbar-brand .navbar-logo { background-image: url(/img/texnest-lockup-dark.svg) !important; }
 .navbar-default .navbar-brand .navbar-title { display: none !important; }
+/* Dashboard sidebar when the top navbar is hidden (Trash, Archived): Overleaf's vendor image becomes the lockup. */
+.ds-nav-page-switcher-logo a { display: block; width: 150px; height: 36px; background: url(/img/texnest-lockup.svg) no-repeat left center / contain; }
+[data-theme=default] .ds-nav-page-switcher-logo a, [data-theme=dark] .ds-nav-page-switcher-logo a { background-image: url(/img/texnest-lockup-dark.svg); }
+.ds-nav-page-switcher-logo img { display: none; }
 .ds-nav-ds-name { display: none; }
+/* Editor home button */
 :root, [data-theme=light] { --redesign-toolbar-logo-url: url(/img/texnest.svg); }
 [data-theme=default], [data-theme=dark] { --redesign-toolbar-logo-url: url(/img/texnest-mark-dark.svg); }
 .ide-redesign-toolbar .ide-redesign-toolbar-home-link .toolbar-ol-logo { background-image: var(--redesign-toolbar-logo-url); }
